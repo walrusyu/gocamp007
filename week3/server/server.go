@@ -1,4 +1,4 @@
-package week3
+package server
 
 import (
 	"context"
@@ -16,10 +16,10 @@ type HttpServer interface {
 }
 
 type MyServer struct {
-	name     string
-	sigChan  chan os.Signal
-	server   http.Server
-	ctx      context.Context
+	name    string
+	sigChan chan os.Signal
+	server  http.Server
+	ctx     context.Context
 }
 
 func (s *MyServer) Reg(addr string, handler http.Handler) {
