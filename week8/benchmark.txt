@@ -1,0 +1,27 @@
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 10 -n 100000 -q
+SET: 72046.11 requests per second, p50=0.319 msec
+GET: 72886.30 requests per second, p50=0.303 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 20 -n 100000 -q
+SET: 78369.91 requests per second, p50=0.295 msec
+GET: 78740.16 requests per second, p50=0.295 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 50 -n 100000 -q
+SET: 68399.45 requests per second, p50=0.311 msec
+GET: 79681.27 requests per second, p50=0.303 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 100 -n 100000 -q
+SET: 76687.12 requests per second, p50=0.303 msec
+GET: 78678.20 requests per second, p50=0.295 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 200 -n 100000 -q
+SET: 77220.08 requests per second, p50=0.295 msec
+GET: 72621.64 requests per second, p50=0.303 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 1000 -n 100000 -q
+SET: 72411.30 requests per second, p50=0.311 msec
+GET: 73152.89 requests per second, p50=0.295 msec
+
+root@c4cb2e682d48:/data# redis-benchmark -t get,set -d 5000 -n 100000 -q
+SET: 68540.09 requests per second, p50=0.343 msec
+GET: 70224.72 requests per second, p50=0.335 msec
