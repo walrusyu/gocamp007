@@ -1,0 +1,15 @@
+fix length
+服务端与客户端每次发送与接受固定长度字节的数据
+实际数据小于这个固定长度，会造成浪费
+实际数据大于这个固定长度，会造成半包问题
+
+delimiter based
+通过某个分隔符（比如\r\n），去决定某个请求的边界
+需要对数据包内容进行遍历，找到分隔符，可能存在一些性能消耗
+
+
+length field based frame decoder
+数据包的开始固定几个字节作为Header，在Header中存放一个Content-Length字段，表示这个数据包内容的长度
+根据Header长度+Content长度，分割数据包
+
+
