@@ -1,0 +1,23 @@
+syntax = "proto3";
+package demo.api;
+option go_package = "github.com/walrusyu/gocamp007/demo/api/metadata";
+
+import "google/protobuf/empty.proto";
+
+service User {
+  rpc Get(google.protobuf.Empty) returns (UserReply){}
+}
+
+message UserReply {
+  int32 id = 1;
+  string name = 2;
+  int32  age = 3;
+
+  message Address {
+    string province = 1;
+    string city = 2;
+    int32 street = 3;
+  }
+
+  repeated Address orderItems = 4;
+}
