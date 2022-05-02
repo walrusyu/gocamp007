@@ -1,0 +1,23 @@
+syntax = "proto3";
+package demo.api.order.v1;
+option go_package = "github.com/walrusyu/gocamp007/demo/api/order/v1";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+service OrderService {
+  rpc Get(google.protobuf.Empty) returns (Order){}
+}
+
+message Order {
+  google.protobuf.Int32Value id = 1;
+  string description = 2;
+
+  message OrderItem {
+    google.protobuf.Int32Value id = 1;
+    string offer = 2;
+    int32  quantity = 3;
+  }
+
+  repeated OrderItem orderItems = 3;
+}
