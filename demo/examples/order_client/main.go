@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	pb "github.com/walrusyu/gocamp007/demo/api/bff/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"time"
 
-	pb "github.com/walrusyu/gocamp007/demo/api/order/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -29,12 +29,12 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pb.NewOrderServiceClient(conn)
+	c := pb.NewBffServiceClient(conn)
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.Get(ctx, &emptypb.Empty{})
+	r, err := c.GetOrder(ctx, &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

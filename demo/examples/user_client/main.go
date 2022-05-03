@@ -5,12 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	pb "github.com/walrusyu/gocamp007/demo/api/bff/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"log"
 	"time"
 
-	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -32,12 +32,12 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pb.NewUserServiceClient(conn)
+	c := pb.NewBffServiceClient(conn)
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.Get(ctx, &emptypb.Empty{})
+	r, err := c.GetUser(ctx, &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -47,7 +47,7 @@ func main() {
 	var messageType *pb.User
 	fm, err := fieldmaskpb.New(messageType, "age")
 	if err == nil {
-		r, err = c.Update(ctx, &pb.UpdateRequest{
+		r, err = c.UpdateUser(ctx, &pb.UpdateUserRequest{
 			User: &pb.User{
 				Id:   &wrappers.Int32Value{Value: 1},
 				Name: "ywf",

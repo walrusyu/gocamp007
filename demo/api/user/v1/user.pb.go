@@ -30,8 +30,8 @@ type User struct {
 
 	Id      *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name    string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Age     int32                  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
-	Address *User_Address          `protobuf:"bytes,4,opt,name=address,proto3" json:"address,omitempty"`
+	Age     int32         `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
+	Address *User_Address `protobuf:"bytes,4,opt,name=address,proto3" json:"address,omitempty"`
 }
 
 func (x *User) Reset() {
