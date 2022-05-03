@@ -1,30 +1,21 @@
-package main
+package server
 
 import (
 	context "context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	pb "github.com/walrusyu/gocamp007/demo/api/bff/v1"
+	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+var _ pb.UserServiceServer = &Server{}
+
 type Server struct {
-	pb.UnimplementedBffServiceServer
+	pb.UnimplementedUserServiceServer
 }
 
-func (*Server) GetOrder(context.Context, *emptypb.Empty) (*pb.Order, error) {
-	return &pb.Order{
-		Id: &wrapperspb.Int32Value{Value: 1},
-		OrderItems: []*pb.Order_OrderItem{
-			&pb.Order_OrderItem{
-				Id:       &wrapperspb.Int32Value{Value: 1},
-				Offer:    "test",
-				Quantity: 10,
-			}}}, nil
-}
-
-func (*Server) GetUser(context.Context, *emptypb.Empty) (*pb.User, error) {
+func (*Server) Get(context.Context, *emptypb.Empty) (*pb.User, error) {
 	return &pb.User{
 		Id:   &wrapperspb.Int32Value{Value: 1},
 		Name: "ywf",
@@ -36,7 +27,7 @@ func (*Server) GetUser(context.Context, *emptypb.Empty) (*pb.User, error) {
 		}}, nil
 }
 
-func (*Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+func (*Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.User, error) {
 	user := &pb.User{
 		Id:   &wrappers.Int32Value{Value: 1},
 		Name: "ywf2",

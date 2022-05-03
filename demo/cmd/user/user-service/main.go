@@ -4,18 +4,15 @@ import (
 	"flag"
 	"fmt"
 	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
+	"github.com/walrusyu/gocamp007/demo/cmd/user/user-service/server"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
 var (
-	port = flag.Int("port", 5001, "The server port")
+	port = flag.Int("port", 6002, "The server port")
 )
-
-type userServer struct {
-	Server
-}
 
 func main() {
 	flag.Parse()
@@ -24,7 +21,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterUserServiceServer(s, &userServer{})
+	pb.RegisterUserServiceServer(s, &server.Server{})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
