@@ -8,13 +8,10 @@ package v1
 
 import (
 	context "context"
-	"fmt"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -76,53 +73,6 @@ func (UnimplementedUserServiceServer) Update(context.Context, *UpdateRequest) (*
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
-
-type MyUserServiceServer struct {
-	UnimplementedUserServiceServer
-}
-
-func (*MyUserServiceServer) Get(context.Context, *emptypb.Empty) (*User, error) {
-	return &User{
-		Id:   &wrapperspb.Int32Value{Value: 1},
-		Name: "ywf",
-		Age:  1,
-		Address: &User_Address{
-			Province: "sh1",
-			City:     "cn1",
-			Street:   "xx1",
-		}}, nil
-}
-
-func (*MyUserServiceServer) Update(ctx context.Context, req *UpdateRequest) (*User, error) {
-	user := &User{
-		Id:   &wrappers.Int32Value{Value: 1},
-		Name: "ywf2",
-		Age:  18,
-		Address: &User_Address{
-			Province: "sh2",
-			City:     "hk2",
-			Street:   "lc2",
-		},
-	}
-	validPaths := req.Mask.GetPaths()
-	fmt.Printf("paths:%v", validPaths)
-	if isFieldUsed("name", validPaths) {
-		user.Name = req.User.Name
-	}
-	if isFieldUsed("age", validPaths) {
-		user.Age = req.User.Age
-	}
-	return user, nil
-}
-
-func isFieldUsed(field string, paths []string) bool {
-	for i := range paths {
-		if paths[i] == field {
-			return true
-		}
-	}
-	return false
-}
 
 // UnsafeUserServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to UserServiceServer will

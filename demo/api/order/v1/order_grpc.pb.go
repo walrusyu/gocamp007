@@ -12,7 +12,6 @@ import (
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -60,21 +59,6 @@ func (UnimplementedOrderServiceServer) Get(context.Context, *emptypb.Empty) (*Or
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
-
-type MyOrderServiceServer struct {
-	UnimplementedOrderServiceServer
-}
-
-func(*MyOrderServiceServer) Get(context.Context, *emptypb.Empty) (*Order, error) {
-	return &Order{
-		Id: &wrapperspb.Int32Value{Value: 1},
-		OrderItems: []*Order_OrderItem{
-			&Order_OrderItem{
-				Id: &wrapperspb.Int32Value{Value: 1},
-				Offer: "test",
-				Quantity: 10,
-			}}}, nil
-}
 
 // UnsafeOrderServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to OrderServiceServer will

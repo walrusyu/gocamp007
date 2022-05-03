@@ -14,7 +14,7 @@ var (
 )
 
 type bffServer struct {
-	pb.MyBffServiceServer
+	Server
 }
 
 func main() {
