@@ -3,32 +3,33 @@ package server
 import (
 	context "context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
+	"github.com/walrusyu/gocamp007/demo/cmd/user/internal/service"
 	cErros "github.com/walrusyu/gocamp007/demo/errors"
-	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-var _ pb.UserServiceServer = &Server{}
+var _ pb.UserServiceServer = &server{}
 
-type Server struct {
+type server struct {
 	pb.UnimplementedUserServiceServer
+	service service.Service
 }
 
-func (*Server) Get(ctx context.Context, req *emptypb.Empty) (*pb.User, error) {
+func NewServer(dsn string) (pb.UserServiceServer, error) {
+	service, err := service.NewService(dsn)
+	if err != nil {
+		return nil, err
+	}
+	return &server{
+		service: service,
+	}, nil
+}
+
+func (s *server) Get(ctx context.Context, req *pb.GetRequest) (*pb.User, error) {
 	c := make(chan *pb.User, 1)
 	defer close(c)
 	go func() {
-		user := &pb.User{
-			Id:   &wrapperspb.Int32Value{Value: 1},
-			Name: "ywf",
-			Age:  1,
-			Address: &pb.User_Address{
-				Province: "sh1",
-				City:     "cn1",
-				Street:   "xx1",
-			}}
+		user := s.service.GetUser(req.Id.Value)
 		c <- user
 	}()
 	select {
@@ -39,20 +40,11 @@ func (*Server) Get(ctx context.Context, req *emptypb.Empty) (*pb.User, error) {
 	}
 }
 
-func (*Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.User, error) {
+func (s *server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.User, error) {
 	c := make(chan *pb.User, 1)
 	defer close(c)
 	go func() {
-		user := &pb.User{
-			Id:   &wrappers.Int32Value{Value: 1},
-			Name: "ywf2",
-			Age:  18,
-			Address: &pb.User_Address{
-				Province: "sh2",
-				City:     "hk2",
-				Street:   "lc2",
-			},
-		}
+		user := s.service.GetUser(req.User.Id.Value)
 		validPaths := req.Mask.GetPaths()
 		fmt.Printf("paths:%v", validPaths)
 		if isFieldUsed("name", validPaths) {
@@ -60,6 +52,10 @@ func (*Server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.User, err
 		}
 		if isFieldUsed("age", validPaths) {
 			user.Age = req.User.Age
+		}
+		user, err := s.service.UpdateUser(user)
+		if err != nil {
+			return
 		}
 		c <- user
 	}()

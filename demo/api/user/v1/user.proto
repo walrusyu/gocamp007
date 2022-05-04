@@ -16,9 +16,10 @@ message User {
   int32  age = 3;
 
   message Address {
-    string province = 1;
-    string city = 2;
-    string street = 3;
+    google.protobuf.Int32Value id = 1;
+    string province = 2;
+    string city = 3;
+    string street = 4;
   }
 
   Address address = 4;

@@ -2,10 +2,10 @@ package service
 
 import (
 	pb "github.com/walrusyu/gocamp007/demo/api/order/v1"
+	"github.com/walrusyu/gocamp007/demo/cmd/order/internal/biz"
 	cErros "github.com/walrusyu/gocamp007/demo/errors"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
-import "github.com/walrusyu/gocamp007/demo/cmd/order/internal/biz"
 
 type Service interface {
 	GetOrder(int32) *pb.Order

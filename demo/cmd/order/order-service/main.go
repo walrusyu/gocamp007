@@ -21,7 +21,11 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterOrderServiceServer(s, &server.Server{})
+	server, err := server.NewServer("dsn")
+	if err != nil {
+		log.Fatalf("failed to create order server")
+	}
+	pb.RegisterOrderServiceServer(s, server)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
