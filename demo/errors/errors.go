@@ -20,28 +20,6 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("error: code = %d reason = %s message = %s metadata = %v", e.Code, e.Reason, e.Message, e.Metadata)
 }
 
-func toGRPCCode(grpcCode int32) codes.Code {
-	switch grpcCode {
-	case 200:
-		return codes.OK
-	case 404:
-		return codes.NotFound
-	default:
-		return codes.Internal
-	}
-}
-
-func FromGRPCCode(grpcCode codes.Code) int32 {
-	switch grpcCode {
-	case codes.OK:
-		return 200
-	case codes.NotFound:
-		return 404
-	default:
-		return 500
-	}
-}
-
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
 	return status.New(toGRPCCode(e.Code), e.Message)
@@ -60,6 +38,18 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 	err := proto.Clone(e).(*Error)
 	err.Metadata = md
 	return err
+}
+
+func (e *Error) IsOk() bool {
+	return e.Code == 200
+}
+
+func (e *Error) IsNotFound() bool {
+	return e.Code == 404
+}
+
+func (e *Error) IsInternalError() bool {
+	return e.Code == 500
 }
 
 // New returns an error object for the code, message.
@@ -125,4 +115,26 @@ func FromError(err error) *Error {
 		return ret
 	}
 	return New(UnknownCode, UnknownReason, err.Error())
+}
+
+func toGRPCCode(grpcCode int32) codes.Code {
+	switch grpcCode {
+	case 200:
+		return codes.OK
+	case 404:
+		return codes.NotFound
+	default:
+		return codes.Internal
+	}
+}
+
+func FromGRPCCode(grpcCode codes.Code) int32 {
+	switch grpcCode {
+	case codes.OK:
+		return 200
+	case codes.NotFound:
+		return 404
+	default:
+		return 500
+	}
 }
