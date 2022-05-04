@@ -2,12 +2,11 @@ syntax = "proto3";
 package demo.api.user.v1;
 option go_package = "github.com/walrusyu/gocamp007/demo/api/user/v1";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/field_mask.proto";
 
 service UserService {
-  rpc Get(google.protobuf.Empty) returns (User);
+  rpc Get(GetRequest) returns (User);
   rpc Update(UpdateRequest) returns(User);
 }
 
@@ -23,6 +22,11 @@ message User {
   }
 
   Address address = 4;
+}
+
+
+message GetRequest {
+  google.protobuf.Int32Value id = 1;
 }
 
 message UpdateRequest {

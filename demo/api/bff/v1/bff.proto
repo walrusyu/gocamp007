@@ -2,13 +2,12 @@ syntax = "proto3";
 package demo.api.bff.v1;
 option go_package = "github.com/walrusyu/gocamp007/demo/api/bff/v1";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/field_mask.proto";
 
 service BffService {
-  rpc GetOrder(google.protobuf.Empty) returns (Order){}
-  rpc GetUser(google.protobuf.Empty) returns (User);
+  rpc GetOrder(GetOrderRequest) returns (Order){}
+  rpc GetUser(GetUserRequest) returns (User);
   rpc UpdateUser(UpdateUserRequest) returns(User);
 }
 
@@ -37,6 +36,14 @@ message User {
   }
 
   Address address = 4;
+}
+
+message GetOrderRequest {
+  google.protobuf.Int32Value  id = 1;
+}
+
+message GetUserRequest {
+  google.protobuf.Int32Value  id = 1;
 }
 
 message UpdateUserRequest {

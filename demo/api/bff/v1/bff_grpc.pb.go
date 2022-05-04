@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BffServiceClient interface {
-	GetOrder(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Order, error)
-	GetUser(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*User, error)
+	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*Order, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 }
 
@@ -36,7 +35,7 @@ func NewBffServiceClient(cc grpc.ClientConnInterface) BffServiceClient {
 	return &bffServiceClient{cc}
 }
 
-func (c *bffServiceClient) GetOrder(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Order, error) {
+func (c *bffServiceClient) GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*Order, error) {
 	out := new(Order)
 	err := c.cc.Invoke(ctx, "/demo.api.bff.v1.BffService/GetOrder", in, out, opts...)
 	if err != nil {
@@ -45,7 +44,7 @@ func (c *bffServiceClient) GetOrder(ctx context.Context, in *emptypb.Empty, opts
 	return out, nil
 }
 
-func (c *bffServiceClient) GetUser(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*User, error) {
+func (c *bffServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/demo.api.bff.v1.BffService/GetUser", in, out, opts...)
 	if err != nil {
@@ -67,8 +66,8 @@ func (c *bffServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest
 // All implementations must embed UnimplementedBffServiceServer
 // for forward compatibility
 type BffServiceServer interface {
-	GetOrder(context.Context, *emptypb.Empty) (*Order, error)
-	GetUser(context.Context, *emptypb.Empty) (*User, error)
+	GetOrder(context.Context, *GetOrderRequest) (*Order, error)
+	GetUser(context.Context, *GetUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	mustEmbedUnimplementedBffServiceServer()
 }
@@ -77,10 +76,10 @@ type BffServiceServer interface {
 type UnimplementedBffServiceServer struct {
 }
 
-func (UnimplementedBffServiceServer) GetOrder(context.Context, *emptypb.Empty) (*Order, error) {
+func (UnimplementedBffServiceServer) GetOrder(context.Context, *GetOrderRequest) (*Order, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrder not implemented")
 }
-func (UnimplementedBffServiceServer) GetUser(context.Context, *emptypb.Empty) (*User, error) {
+func (UnimplementedBffServiceServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedBffServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*User, error) {
@@ -100,7 +99,7 @@ func RegisterBffServiceServer(s grpc.ServiceRegistrar, srv BffServiceServer) {
 }
 
 func _BffService_GetOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -112,13 +111,13 @@ func _BffService_GetOrder_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/demo.api.bff.v1.BffService/GetOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BffServiceServer).GetOrder(ctx, req.(*emptypb.Empty))
+		return srv.(BffServiceServer).GetOrder(ctx, req.(*GetOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _BffService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -130,7 +129,7 @@ func _BffService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/demo.api.bff.v1.BffService/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BffServiceServer).GetUser(ctx, req.(*emptypb.Empty))
+		return srv.(BffServiceServer).GetUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

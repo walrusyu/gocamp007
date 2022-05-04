@@ -10,27 +10,28 @@ import (
 	cErros "github.com/walrusyu/gocamp007/demo/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"time"
 )
 
-type Server struct {
+var _ pb.BffServiceServer = &server{}
+
+type server struct {
 	pb.UnimplementedBffServiceServer
 	config           config.BffServerConfig
 	orderServiceAddr string
 	userServiceAddr  string
 }
 
-func NewServer(config config.BffServerConfig) *Server {
-	return &Server{
+func NewServer(config config.BffServerConfig) pb.BffServiceServer {
+	return &server{
 		config:           config,
 		orderServiceAddr: fmt.Sprintf("%s:%d", config.OrderServiceIP, config.OrderServicePort),
 		userServiceAddr:  fmt.Sprintf("%s:%d", config.UserServiceIP, config.UserServicePort),
 	}
 }
 
-func (s *Server) GetOrder(ctx context.Context, req *emptypb.Empty) (*pb.Order, error) {
+func (s *server) GetOrder(ctx context.Context, req *pb.GetOrderRequest) (*pb.Order, error) {
 	c := make(chan *pb.Order, 1)
 	defer close(c)
 	go func() {
@@ -45,7 +46,7 @@ func (s *Server) GetOrder(ctx context.Context, req *emptypb.Empty) (*pb.Order, e
 		// Contact the server and print out its response.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		r, err := client.Get(ctx, &emptypb.Empty{})
+		r, err := client.Get(ctx, &orderpb.GetRequest{Id: req.GetId()})
 		if err != nil {
 			log.Fatalf("could not get order: %v", err)
 		}
@@ -72,7 +73,7 @@ func (s *Server) GetOrder(ctx context.Context, req *emptypb.Empty) (*pb.Order, e
 	}
 }
 
-func (s *Server) GetUser(ctx context.Context, req *emptypb.Empty) (*pb.User, error) {
+func (s *server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
 	c := make(chan *pb.User, 1)
 	defer close(c)
 	go func() {
@@ -87,7 +88,7 @@ func (s *Server) GetUser(ctx context.Context, req *emptypb.Empty) (*pb.User, err
 		// Contact the server and print out its response.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		r, err := client.Get(ctx, &emptypb.Empty{})
+		r, err := client.Get(ctx, &userpb.GetRequest{Id: req.GetId()})
 		if err != nil {
 			log.Fatalf("could not get user: %v", err)
 		}
@@ -113,7 +114,7 @@ func (s *Server) GetUser(ctx context.Context, req *emptypb.Empty) (*pb.User, err
 	}
 }
 
-func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+func (s *server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
 	c := make(chan *pb.User, 1)
 	defer close(c)
 	go func() {
