@@ -1,77 +1,97 @@
 package server
 
 import (
-	context "context"
 	"fmt"
 	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
 	"github.com/walrusyu/gocamp007/demo/cmd/user/internal/service"
-	cErros "github.com/walrusyu/gocamp007/demo/errors"
+	clog "github.com/walrusyu/gocamp007/demo/internal/log"
+	"github.com/walrusyu/gocamp007/demo/internal/middleware"
+	"google.golang.org/grpc"
+	"log"
+	"net"
 )
 
-var _ pb.UserServiceServer = &server{}
-
-type server struct {
+type serviceServer struct {
 	pb.UnimplementedUserServiceServer
 	service service.Service
 }
 
-func NewServer(dsn string) (pb.UserServiceServer, error) {
-	service, err := service.NewService(dsn)
+type server struct {
+	*grpc.Server
+	address     string
+	port        int32
+	lis         net.Listener
+	middlewares []middleware.Middleware
+	dsn         string
+	logger      *clog.WrappedLogger
+}
+
+type Option func(*server)
+
+func NewServer(opts ...Option) *server {
+	svr := &server{
+		logger: clog.NewLogger(),
+	}
+	for _, o := range opts {
+		o(svr)
+	}
+	svr.Server = grpc.NewServer()
+	svc, err := service.NewService(svr.dsn)
 	if err != nil {
-		return nil, err
+		log.Fatalf("failed to create serviceServer: %v", err)
+		return svr
 	}
-	return &server{
-		service: service,
-	}, nil
+	pb.RegisterUserServiceServer(svr.Server, &serviceServer{service: svc})
+	if err != nil {
+		log.Fatalf("failed to register serviceServer: %v", err)
+		return svr
+	}
+	return svr
 }
 
-func (s *server) Get(ctx context.Context, req *pb.GetRequest) (*pb.User, error) {
-	c := make(chan *pb.User, 1)
-	defer close(c)
-	go func() {
-		user := s.service.GetUser(req.Id.Value)
-		c <- user
-	}()
-	select {
-	case <-ctx.Done():
-		return nil, cErros.New(500, "timeout", "can not get user")
-	default:
-		return <-c, nil
-	}
-}
-
-func (s *server) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.User, error) {
-	c := make(chan *pb.User, 1)
-	defer close(c)
-	go func() {
-		user := s.service.GetUser(req.User.Id.Value)
-		validPaths := req.Mask.GetPaths()
-		fmt.Printf("paths:%v", validPaths)
-		if isFieldUsed("name", validPaths) {
-			user.Name = req.User.Name
-		}
-		if isFieldUsed("age", validPaths) {
-			user.Age = req.User.Age
-		}
-		user, err := s.service.UpdateUser(user)
+func (s *server) listenAndEndpoint() {
+	if s.lis == nil {
+		lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.address, s.port))
 		if err != nil {
-			return
+			log.Fatalf("failed to listen: %v", err)
 		}
-		c <- user
-	}()
-	select {
-	case <-ctx.Done():
-		return nil, cErros.New(500, "timeout", "can not update user")
-	default:
-		return <-c, nil
+		s.lis = lis
 	}
 }
 
-func isFieldUsed(field string, paths []string) bool {
-	for i := range paths {
-		if paths[i] == field {
-			return true
-		}
+func (s *server) Start() {
+	log.Printf("server listening at %v", s.lis.Addr())
+	err := s.Serve(s.lis)
+	if err != nil {
+		log.Fatalf("failed to start: %v", err)
 	}
-	return false
+	s.logger.Info("message", "server started at %v", s.lis.Addr())
+}
+
+func (s *server) Stop() {
+	s.logger.Info("message", "server stopped")
+}
+
+func SetAddress(address string) Option {
+	return func(s *server) {
+		s.address = address
+	}
+}
+
+func SetPort(port int32) Option {
+	return func(s *server) {
+		s.port = port
+	}
+}
+
+func SetMiddlewares(middlewares ...middleware.Middleware) Option {
+	return func(s *server) {
+		s.middlewares = middlewares
+	}
+}
+
+func SetDbConnection(dsn string) Option {
+	return func(s *server) {
+		s.dsn = dsn
+	}
 }
