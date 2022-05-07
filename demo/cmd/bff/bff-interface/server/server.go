@@ -6,8 +6,10 @@ import (
 	pb "github.com/walrusyu/gocamp007/demo/api/bff/v1"
 	orderpb "github.com/walrusyu/gocamp007/demo/api/order/v1"
 	userpb "github.com/walrusyu/gocamp007/demo/api/user/v1"
+	"github.com/walrusyu/gocamp007/demo/cmd/bff/bff-interface/client"
 	"github.com/walrusyu/gocamp007/demo/config"
 	cErros "github.com/walrusyu/gocamp007/demo/errors"
+	"github.com/walrusyu/gocamp007/demo/internal/middleware/tracing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
@@ -36,7 +38,14 @@ func (s *server) GetOrder(ctx context.Context, req *pb.GetOrderRequest) (*pb.Ord
 	defer close(c)
 	go func() {
 		// Set up a connection to the server.
-		conn, err := grpc.Dial(s.orderServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := client.Dial(ctx,
+			client.WithEndpoint("127.0.0.1:9000"),
+			client.WithMiddleware(
+				tracing.TracingMiddlewareOnClient(),
+			),
+			client.WithTimeout(2*time.Second))
+
+		// for tracing remote ip recording
 		if err != nil {
 			log.Fatalf("did not connect: %v", err)
 		}
