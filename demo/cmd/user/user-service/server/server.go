@@ -1,12 +1,16 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	pb "github.com/walrusyu/gocamp007/demo/api/user/v1"
 	"github.com/walrusyu/gocamp007/demo/cmd/user/internal/service"
 	clog "github.com/walrusyu/gocamp007/demo/internal/log"
 	"github.com/walrusyu/gocamp007/demo/internal/middleware"
+	"github.com/walrusyu/gocamp007/demo/internal/transport"
+	tg "github.com/walrusyu/gocamp007/demo/internal/transport/grpc"
 	"google.golang.org/grpc"
+	gmetadata "google.golang.org/grpc/metadata"
 	"log"
 	"net"
 )
@@ -20,6 +24,7 @@ type server struct {
 	*grpc.Server
 	address     string
 	port        int32
+	endpoint    string
 	lis         net.Listener
 	middlewares []middleware.Middleware
 	dsn         string
@@ -35,7 +40,16 @@ func NewServer(opts ...Option) *server {
 	for _, o := range opts {
 		o(svr)
 	}
-	svr.Server = grpc.NewServer()
+
+	interceptors := []grpc.UnaryServerInterceptor{
+		svr.unaryServerInterceptor(),
+	}
+
+	grpcOpts := []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(interceptors...),
+	}
+
+	svr.Server = grpc.NewServer(grpcOpts...)
 	svc, err := service.NewService(svr.dsn)
 	if err != nil {
 		log.Fatalf("failed to create serviceServer: %v", err)
@@ -93,5 +107,28 @@ func SetMiddlewares(middlewares ...middleware.Middleware) Option {
 func SetDbConnection(dsn string) Option {
 	return func(s *server) {
 		s.dsn = dsn
+	}
+}
+
+func (s *server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		md, _ := gmetadata.FromIncomingContext(ctx)
+		replyHeader := gmetadata.MD{}
+		ctx = transport.NewServerContext(ctx, tg.NewTransport(s.endpoint, info.FullMethod, tg.HeaderCarrier(md), tg.HeaderCarrier(replyHeader)))
+		//if s.timeout > 0 {
+		//	ctx, cancel = context.WithTimeout(ctx, s.timeout)
+		//	defer cancel()
+		//}
+		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return handler(ctx, req)
+		}
+		if len(s.middlewares) > 0 {
+			h = middleware.Chain(s.middlewares...)(h)
+		}
+		reply, err := h(ctx, req)
+		if len(replyHeader) > 0 {
+			_ = grpc.SetHeader(ctx, replyHeader)
+		}
+		return reply, err
 	}
 }

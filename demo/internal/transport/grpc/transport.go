@@ -10,8 +10,17 @@ var _ transport.Transporter = &Transport{}
 type Transport struct {
 	endpoint    string
 	operation   string
-	reqHeader   headerCarrier
-	replyHeader headerCarrier
+	reqHeader   HeaderCarrier
+	replyHeader HeaderCarrier
+}
+
+func NewTransport(endpoint string, operation string, reqHeader HeaderCarrier, replyHeader HeaderCarrier) *Transport {
+	return &Transport{
+		endpoint:    endpoint,
+		operation:   operation,
+		reqHeader:   reqHeader,
+		replyHeader: replyHeader,
+	}
 }
 
 func (t *Transport) Kind() string {
@@ -34,10 +43,10 @@ func (t *Transport) ReplyHeader() transport.Header {
 	return t.replyHeader
 }
 
-type headerCarrier metadata.MD
+type HeaderCarrier metadata.MD
 
 // Get returns the value associated with the passed key.
-func (mc headerCarrier) Get(key string) string {
+func (mc HeaderCarrier) Get(key string) string {
 	vals := metadata.MD(mc).Get(key)
 	if len(vals) > 0 {
 		return vals[0]
@@ -46,12 +55,12 @@ func (mc headerCarrier) Get(key string) string {
 }
 
 // Set stores the key-value pair.
-func (mc headerCarrier) Set(key string, value string) {
+func (mc HeaderCarrier) Set(key string, value string) {
 	metadata.MD(mc).Set(key, value)
 }
 
 // Keys lists the keys stored in this carrier.
-func (mc headerCarrier) Keys() []string {
+func (mc HeaderCarrier) Keys() []string {
 	keys := make([]string, 0, len(mc))
 	for k := range metadata.MD(mc) {
 		keys = append(keys, k)
